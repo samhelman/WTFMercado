@@ -1,0 +1,969 @@
+<AddPriceDialogContent>
+    orientation: 'vertical'
+    size_hint_y: None
+    spacing: '16dp'
+    height: '80dp'
+
+    MDTextField:
+        id: price_field
+        hint_text: 'Add Price'
+        helper_text: 'eg. 12.69'
+        helper_text_mode: 'on_focus'
+        color_mode: 'custom'
+        input_filter: 'float'
+
+    BoxLayout:
+        size_hint_y: None
+        spacing: '16dp'
+
+        BoxLayout:
+            size_hint_x: .9
+
+        MDFlatButton:
+            text: 'Cancel'
+            on_release:
+                app.popup.dismiss()
+
+        MDRaisedButton:
+            text: 'Add'
+            on_release:
+                app.add_price(price_field.text)
+
+<PriceButton>
+    on_release:
+        app.add_price_popup()
+
+<DeleteDialogContent>
+    orientation: 'vertical'
+    size_hint_y: None
+    spacing: '16dp'
+
+    MDLabel:
+        text: 'Are you sure you want to delete this list?'
+
+    BoxLayout:
+        size_hint_y: None
+        spacing: '16dp'
+
+        BoxLayout:
+            size_hint_x: .9
+
+        MDFlatButton:
+            text: 'Cancel'
+            on_release:
+                app.popup.dismiss()
+
+        MDRaisedButton:
+            text: 'Delete'
+            on_release:
+                app.delete_list()
+                app.root.ids.screen_manager.current = app.last_screen
+                app.popup.dismiss()
+
+<DeleteButton>
+    on_release:
+        app.confirm_delete()
+
+<AdminShoppingListItem>
+    size_hint_y: None
+    height: self.minimum_height
+    cols: 3
+
+    MDLabel:
+        text: root.text
+
+    MDLabel:
+        text: root.num
+        size_hint_x: None
+        width: '48dp'
+
+    MDCheckbox:
+        size_hint: None,None
+        size: "48dp", "48dp"
+
+<ListWidget>
+    size_hint_y: None
+    text: app.shopping_list[0]
+    secondary_text: 'Status: %s' % root.status
+    increment_width: app.root.ids.submitted_lists.width
+    on_release:
+        app.last_screen = app.root.ids.screen_manager.current
+        app.open_list('list_view',self.text)
+
+<UsernameListWidget>
+    size_hint_y: None
+    text: self.username
+    secondary_text: 'Password: %s' % self.password
+    increment_width: app.root.ids.accounts_list.width
+    on_release:
+        app.user_data_username = self.text
+        app.user_data_password = self.secondary_text
+        app.last_screen = app.root.ids.screen_manager.current
+        app.open_user_data()
+
+<CustomCard>
+    id: app.card_dict[app.num]
+    padding: '8dp'
+    size_hint: None, None
+    width: '250dp'
+    height: '45dp'
+    md_bg_color: app.theme_cls.primary_color
+
+    MDLabel:
+        id: label
+        text: root.text
+        theme_text_color: 'Custom'
+        text_color: app.theme_cls.opposite_text_color
+
+    MDIconButton:
+        id: icon
+        icon: 'close'
+        theme_text_color: 'Custom'
+        text_color: app.theme_cls.opposite_text_color
+        pos_hint: {"center_x": .5, "center_y": .5}
+        on_release: app.remove_card(root)
+
+<Navigation_Drawer>
+    id: nav_drawer
+    orientation: "vertical"
+
+    BoxLayout:
+        orientation: "vertical"
+        size_hint_y: .3
+        padding: '16dp'
+            
+        MDLabel:
+            id: nav_drawer_username
+            text: app.username.upper()
+            size_hint_y: None
+            height: '30dp'
+            font_style: "H4"
+            halign: 'left'
+
+        MDLabel:
+            id: nav_drawer_organisation
+            text: app.organisation
+            size_hint_y: None
+            height: '30dp'
+            font_style: "Subtitle2"
+            halign: 'left'
+
+    ScreenManager:
+        id: nav_drawer_screen_manager
+
+        Screen:
+            name: "nav_screen_home"
+
+            ScrollView:
+                id: scroll_view
+
+                MDList:
+
+                    MDSeparator:
+                        height: '2dp'
+                    
+                    OneLineIconListItem:
+                        text: "Submitted Lists"
+                        on_release:
+                            app.root.ids.screen_manager.current = 'submitted_lists'
+                            app.nav_drawer.set_state()
+                            app.nav_drawer.ids.nav_drawer_screen_manager.current = 'nav_screen_home'
+                        IconLeftWidget:
+                            icon: 'history'
+
+                    OneLineIconListItem:
+                        text: "Balance Overview"
+                        on_release:
+                            app.no_feature()
+                        IconLeftWidget:
+                            icon: 'square-inc-cash'
+
+                    OneLineIconListItem:
+                        text: "Account Settings"
+                        on_release:
+                            nav_drawer_screen_manager.current = 'nav_screen_account_settings'
+                        IconLeftWidget:
+                            icon: 'settings'
+
+                    MDSeparator:
+                        height: '2dp'
+
+                    OneLineIconListItem:
+                        id: admin_options
+                        text: "Admin Options"
+                        on_release:
+                            app.open_admin()
+                        IconLeftWidget:
+                            icon: 'lock'
+
+                    MDSeparator:
+                        height: '2dp'
+
+                    OneLineIconListItem:
+                        id: logout
+                        text: 'Logout'
+                        on_release:
+                            app.logout()
+                        IconLeftWidget:
+                            icon: 'logout'
+
+        Screen:
+            name: "nav_screen_account_settings"
+
+            ScrollView:
+
+                MDList:
+
+                    MDSeparator:
+                        height: '2dp'
+
+                    MDIconButton:
+                        icon: 'arrow-left-thick'
+                        on_release:
+                            nav_drawer_screen_manager.current = 'nav_screen_home'
+
+                    OneLineIconListItem:
+                        text: 'Change Password'
+                        on_release:
+                            app.no_feature()
+                        IconLeftWidget:
+                            icon: 'account-key'
+
+                    OneLineIconListItem:
+                        text: 'Choose Language'
+                        on_release:
+                            app.no_feature()
+                        IconLeftWidget:
+                            icon: 'earth'
+        
+        Screen:
+            name: "nav_screen_admin_options"
+
+            ScrollView:
+
+                MDList:
+
+                    MDSeparator:
+                        height: '2dp'
+
+                    MDIconButton:
+                        icon: 'arrow-left-thick'
+                        on_release:
+                            nav_drawer_screen_manager.current = 'nav_screen_home'
+
+                    OneLineIconListItem:
+                        text: 'View Lists'
+                        on_release:
+                            app.get_finished_lists()
+                            app.set_screen('view_lists')
+                            root.set_state()
+                            app.nav_drawer.ids.nav_drawer_screen_manager.current = 'nav_screen_home'
+                        IconLeftWidget:
+                            icon: 'format-list-bulleted'
+
+                    OneLineIconListItem:
+                        text: 'Archived Lists'
+                        on_release:
+                            app.no_feature()
+                        IconLeftWidget:
+                            icon: 'history'
+
+                    OneLineIconListItem:
+                        text: 'Manage Accounts'
+                        on_release:
+                            app.set_screen('accounts_list')
+                            root.set_state()
+                            app.get_user_accounts()
+                            app.nav_drawer.ids.nav_drawer_screen_manager.current = 'nav_screen_home'
+                        IconLeftWidget:
+                            icon: 'account-group'
+
+                    OneLineIconListItem:
+                        text: 'Go Shopping!'
+                        on_release:
+                            app.open_shopping_list()
+                        IconLeftWidget:
+                            icon: 'shopping'
+
+<MainLayout>
+
+    ScreenManager:
+        id: screen_manager
+
+        Screen:
+            name: "login"
+
+            BoxLayout:
+                orientation: 'vertical'
+
+                BoxLayout:
+                    size_hint: .9, .9
+                    pos_hint: {'center_x': .5, 'center_y': .5}
+                    orientation: 'vertical'
+                    padding: '16pd'
+                    spacing: '16dp'
+
+                    BoxLayout:
+                        size_hint_y: .3
+
+                    MDTextFieldRound:
+                        padding: '16pd'
+                        id: organisation
+                        size_hint: None, None
+                        pos_hint: {'center_x': .5, 'center_y': .5}
+                        width: root.width * .75
+                        hint_text: "La Organización"
+
+                    MDTextFieldRound:
+                        padding: '16pd'
+                        id: username
+                        size_hint: None, None
+                        pos_hint: {'center_x': .5, 'center_y': .5}
+                        width: root.width * .75
+                        hint_text: "Nombre de Usuario"
+
+                    MDTextFieldRound:
+                        padding: '16pd'
+                        id: password
+                        size_hint: None, None
+                        pos_hint: {'center_x': .5, 'center_y': .5}
+                        width: root.width * .75
+                        password: True
+                        hint_text: "Contraseña"
+
+                    MDFillRoundFlatButton:
+                        text: 'Enviar'
+                        pos_hint: {'center_x': .5, 'center_y': .5}
+                        on_release:
+                            app.submit_password(organisation.text, username.text, password.text)
+                            organisation.text = ''
+                            username.text = ''
+                            password.text = ''
+
+                    BoxLayout:
+                        size_hint_y: .9
+
+        Screen:
+            name: "new_list"
+
+            BoxLayout:
+                orientation: "vertical"
+
+                MDToolbar:
+                    id: toolbar
+                    title: "Nueva Lista"
+                    elevation: 10
+                    left_action_items: [['arrow-left-thick', lambda x: app.set_screen(app.last_screen)]]
+
+                BoxLayout:
+                    size_hint: .95, .95
+                    pos_hint: {'center_x': .5, 'center_y': .5}
+                    orientation: 'vertical'
+                    padding: '16pd'
+
+                    ScrollView:
+                        id: new_list_scrollview
+
+                        MDList:
+                            padding: '8dp'
+                            spacing: '8dp'
+
+                            MDLabel:
+                                id: refresco
+                                text: "Refresco"
+                                font_style: "Subtitle2"
+                                size_hint_y: None
+
+                            GridLayout:
+                                cols: 2
+                                spacing: '8dp'
+                                size_hint_y: None
+                                height: self.minimum_height
+
+                                MDRectangleFlatButton:
+                                    id: coke
+                                    text: 'Coke'
+                                    md_bg_color: app.theme_cls.bg_normal
+                                    on_release: app.button_selected(coke)
+
+                                MDRectangleFlatButton:
+                                    id: sprite
+                                    text: 'Sprite'
+                                    md_bg_color: app.theme_cls.bg_normal
+                                    on_release: app.button_selected(sprite)
+
+                            MDLabel:
+                                text: "Carne"
+                                font_style: "Subtitle2"
+                                size_hint_y: None
+
+                            GridLayout:
+                                cols: 2
+                                spacing: '8dp'
+                                size_hint_y: None
+                                height: self.minimum_height
+
+                                MDRectangleFlatButton:
+                                    id: piernas_de_pollo
+                                    text: 'Piernas de Pollo'
+                                    md_bg_color: app.theme_cls.bg_normal
+                                    on_release: app.button_selected(piernas_de_pollo)
+
+                                MDRectangleFlatButton:
+                                    id: pollo_rooster
+                                    text: 'Pollo Rooster'
+                                    md_bg_color: app.theme_cls.bg_normal
+                                    on_release: app.button_selected(pollo_rooster)
+
+                                MDRectangleFlatButton:
+                                    id: carne_molida
+                                    text: 'Carne Molida'
+                                    md_bg_color: app.theme_cls.bg_normal
+                                    on_release: app.button_selected(carne_molida)
+
+                                MDRectangleFlatButton:
+                                    id: cerdo
+                                    text: 'Cerdo'
+                                    md_bg_color: app.theme_cls.bg_normal
+                                    on_release: app.button_selected(cerdo)
+
+                            MDLabel:
+                                text: "Fruta"
+                                font_style: "Subtitle2"
+                                size_hint_y: None
+
+                            GridLayout:
+                                spacing: '8dp'
+                                cols: 3
+                                size_hint_y: None
+                                height: self.minimum_height
+
+                                MDRectangleFlatButton:
+                                    id: platano
+                                    text: 'Platano'
+                                    md_bg_color: app.theme_cls.bg_normal
+                                    on_release: app.button_selected(platano)
+
+                                MDRectangleFlatButton:
+                                    id: manzana
+                                    text: 'Manzana'
+                                    md_bg_color: app.theme_cls.bg_normal
+                                    on_release: app.button_selected(manzana)
+
+                                MDRectangleFlatButton:
+                                    id: naraja
+                                    text: 'Naraja'
+                                    md_bg_color: app.theme_cls.bg_normal
+                                    on_release: app.button_selected(naraja)
+
+                            MDLabel:
+                                text: "Verduras"
+                                font_style: "Subtitle2"
+                                size_hint_y: None
+
+                            GridLayout:
+                                spacing: '8dp'
+                                cols: 3
+                                size_hint_y: None
+                                height: self.minimum_height
+
+                                MDRectangleFlatButton:
+                                    id: pimento
+                                    text: 'Pimento'
+                                    md_bg_color: app.theme_cls.bg_normal
+                                    on_release: app.button_selected(pimento)
+
+                                MDRectangleFlatButton:
+                                    id: cebolla
+                                    text: 'Cebolla'
+                                    md_bg_color: app.theme_cls.bg_normal
+                                    on_release: app.button_selected(cebolla)
+
+                                MDRectangleFlatButton:
+                                    id: jitomate
+                                    text: 'Jitomate'
+                                    md_bg_color: app.theme_cls.bg_normal
+                                    on_release: app.button_selected(jitomate)
+
+                                MDRectangleFlatButton:
+                                    id: lechuga
+                                    text: 'Lechuga'
+                                    md_bg_color: app.theme_cls.bg_normal
+                                    on_release: app.button_selected(lechuga)
+
+                            MDLabel:
+                                text: "Pan"
+                                font_style: "Subtitle2"
+                                size_hint_y: None
+
+                            GridLayout:
+                                spacing: '8dp'
+                                cols: 3
+                                size_hint_y: None
+                                height: self.minimum_height
+
+                                MDRectangleFlatButton:
+                                    id: blanco_wonder
+                                    text: 'Blanco-Wonder'
+                                    md_bg_color: app.theme_cls.bg_normal
+                                    on_release: app.button_selected(blanco_wonder)
+
+                                MDRectangleFlatButton:
+                                    id: integral
+                                    text: 'Integral'
+                                    md_bg_color: app.theme_cls.bg_normal
+                                    on_release: app.button_selected(integral)
+
+                            MDLabel:
+                                text: "Frijoles"
+                                font_style: "Subtitle2"
+                                size_hint_y: None
+
+                            GridLayout:
+                                spacing: '8dp'
+                                cols: 3
+                                size_hint_y: None
+                                height: self.minimum_height
+
+                                MDRectangleFlatButton:
+                                    id: negro
+                                    text: 'Negro'
+                                    md_bg_color: app.theme_cls.bg_normal
+                                    on_release: app.button_selected(negro)
+
+                                MDRectangleFlatButton:
+                                    id: armada
+                                    text: 'Armada'
+                                    md_bg_color: app.theme_cls.bg_normal
+                                    on_release: app.button_selected(armada)
+
+                            MDLabel:
+                                text: "Granos"
+                                font_style: "Subtitle2"
+                                size_hint_y: None
+
+                            GridLayout:
+                                spacing: '8dp'
+                                cols: 3
+                                size_hint_y: None
+                                height: self.minimum_height
+
+                                MDRectangleFlatButton:
+                                    id: arroz
+                                    text: 'Arroz'
+                                    md_bg_color: app.theme_cls.bg_normal
+                                    on_release: app.button_selected(arroz)
+
+                                MDRectangleFlatButton:
+                                    id: pastas
+                                    text: 'Pastas'
+                                    md_bg_color: app.theme_cls.bg_normal
+                                    on_release: app.button_selected(pastas)
+
+                            MDLabel:
+                                text: "Lechería"
+                                font_style: "Subtitle2"
+                                size_hint_y: None
+
+                            GridLayout:
+                                spacing: '8dp'
+                                cols: 3
+                                size_hint_y: None
+                                height: self.minimum_height
+
+                                MDRectangleFlatButton:
+                                    id: queso
+                                    text: 'Queso'
+                                    md_bg_color: app.theme_cls.bg_normal
+                                    on_release: app.button_selected(queso)
+
+                                MDRectangleFlatButton:
+                                    id: leche
+                                    text: 'Leche'
+                                    md_bg_color: app.theme_cls.bg_normal
+                                    on_release: app.button_selected(leche)
+
+                                MDRectangleFlatButton:
+                                    id: huevos
+                                    text: 'Huevos'
+                                    md_bg_color: app.theme_cls.bg_normal
+                                    on_release: app.button_selected(huevos)
+
+                            MDLabel:
+                                text: "Otro"
+                                font_style: "Subtitle2"
+                                size_hint_y: None
+
+                            GridLayout:
+                                spacing: '8dp'
+                                cols: 3
+                                size_hint_y: None
+                                height: self.minimum_height
+
+                                MDRectangleFlatButton:
+                                    id: azucar
+                                    text: 'Azucar'
+                                    md_bg_color: app.theme_cls.bg_normal
+                                    on_release: app.button_selected(azucar)
+
+                            MDLabel:
+                                text: "Limpiando Suministros"
+                                font_style: "Subtitle2"
+                                size_hint_y: None
+
+                            GridLayout:
+                                spacing: '8dp'
+                                cols: 3
+                                size_hint_y: None
+                                height: self.minimum_height
+
+                                MDRectangleFlatButton:
+                                    id: detergente_de_ropas
+                                    text: 'Detergente de Ropas'
+                                    md_bg_color: app.theme_cls.bg_normal
+                                    on_release: app.button_selected(detergente_de_ropas)
+
+                                MDRectangleFlatButton:
+                                    id: jabon
+                                    text: 'Jabon'
+                                    md_bg_color: app.theme_cls.bg_normal
+                                    on_release: app.button_selected(jabon)
+
+                            MDLabel:
+                                text: "Artículos Personalizados"
+                                font_style: "Subtitle2"
+                                size_hint_y: None
+
+                            GridLayout:
+                                id: grid_customitems
+                                cols: 1
+                                spacing: '8dp'
+                                size_hint_y: None
+                                height: self.minimum_height
+
+                            MDRectangleFlatIconButton:
+                                id: AddCustom
+                                size_hint_y: None
+                                increment_width: '165dp'
+                                text: 'Agregar Elemento'
+                                icon: 'plus'
+                                on_release: app.set_screen('custom_item')
+
+                            MDFillRoundFlatButton:
+                                text: 'Enviar'
+                                size_hint_y: None
+                                on_release: app.submit_list()
+
+                            BoxLayout:
+                                size_hint_y: .9
+                                
+        Screen:
+            name: "create_account"
+
+            BoxLayout:
+                orientation: "vertical"
+
+                MDToolbar:
+                    id: toolbar
+                    title: "Create Account"
+                    elevation: 10
+                    left_action_items: [['arrow-left-thick', lambda x: app.set_screen(app.last_screen)]]
+
+                BoxLayout:
+                    size_hint: .95, .95
+                    pos_hint: {'center_x': .5, 'center_y': .5}
+                    orientation: 'vertical'
+                    padding: '16pd'
+
+                    ScrollView:
+
+                        MDList:
+                            padding: '8dp'
+                            spacing: '8dp'
+
+                            MDTextField:
+                                id: new_username_field
+                                hint_text: 'Enter New Username'
+
+                            MDTextField:
+                                id: new_password_field
+                                hint_text: 'Password'
+                                readonly: True
+
+                            BoxLayout:
+                                size_hint_y: None
+
+                                MDLabel:
+                                    text: 'Admin Status'
+                                    size_hint: None, None
+                                    width: '120dp'
+                                
+                                MDSwitch:
+                                    id: admin_switch
+                                    size_hint_y: None
+
+                            MDRaisedButton:
+                                text: 'Create'
+                                on_release:
+                                    app.create_account(new_username_field.text, new_password_field.text, admin_switch.active)
+        
+        Screen:
+            name: "custom_item"
+
+            BoxLayout:
+                orientation: "vertical"
+
+                MDToolbar:
+                    id: toolbar
+                    title: "Artículos Personalizados"
+                    elevation: 10
+                    left_action_items: [['arrow-left-thick', lambda x: app.set_screen('new_list')]]
+                    
+                BoxLayout:
+                	size_hint: .95,.95
+                	pos_hint: {'center_x':.5,'center_y':.5}
+                	orientation: 'vertical'
+                	padding: '16dp'
+                	
+                	ScrollView:
+
+                	    MDList:
+                	        spacing: '8dp'
+
+                	        MDTextField:
+                	            id: custom_item_textfield
+                	            size_hint_y: None
+                	            hint_text: 'Añadir elemento personalizado'
+
+                	        MDRaisedButton:
+                	            text: 'Añadir Artículo'
+                	            on_release:
+                	                app.add_custom_item(custom_item_textfield.text)
+                	                custom_item_textfield.text=''
+                	                custom_item_textfield.on_focus()
+
+                	        GridLayout:
+                	            id: custom_item_grid
+                	            size_hint_y: None
+                	            height: self.minimum_height
+                	            cols: 1
+                	            spacing: '8dp'
+
+        Screen:
+            name: "list_view"
+
+            BoxLayout:
+                orientation: "vertical"
+                spacing: '8dp'
+
+                MDToolbar:
+                    id: toolbar
+                    title: "Tu Lista"
+                    elevation: 10
+                    left_action_items: [['arrow-left-thick', lambda x: app.set_screen(app.last_screen)]]
+                
+                BoxLayout:
+                    id: list_view_buttons
+                    size_hint: None, None
+                    padding: [32,0,32,0]
+                    spacing: '16dp'
+                
+                ScrollView:
+
+                    MDList:
+                        id: view_list_scrollview
+
+        Screen:
+            name: "submitted_lists"
+
+            BoxLayout:
+                orientation: "vertical"
+
+                MDToolbar:
+                    id: toolbar
+                    title: "Submitted Lists"
+                    elevation: 10
+                    left_action_items: [['menu', lambda x: app.nav_drawer.set_state()]]
+                    
+                FloatLayout:
+                    pos_hint: {'center_x':.5,'center_y':.5}
+                    padding: '16dp'
+
+                    ScrollView:
+
+                        MDList: 
+                            id: submitted_lists
+
+                    MDFloatingActionButton:
+                        icon: 'plus'
+                        pos_hint: {'center_x':.9,'center_y':.1}
+                        md_bg_color: app.theme_cls.primary_color
+                        text_color: app.theme_cls.opposite_text_color
+                        on_release:
+                            app.last_screen = 'submitted_lists'
+                            app.set_screen('new_list')
+
+        Screen:
+            name: "shopping_list"
+
+            BoxLayout:
+                orientation: "vertical"
+
+                MDToolbar:
+                    id: toolbar
+                    title: "Shopping List"
+                    elevation: 10
+                    left_action_items: [['menu', lambda x: app.nav_drawer.set_state()]]
+                	
+                ScrollView:
+
+                    MDList:
+
+                        padding: '16dp'
+
+                        MDList:
+
+                            id: shopping_list
+                            padding: '16dp'
+
+                        MDRaisedButton:
+                            text: 'Finish'
+                            on_release:
+                                screen_manager.current = 'finish_with_admin_list'
+
+        Screen:
+            name: "finish_with_admin_list"
+
+            BoxLayout:
+                orientation: "vertical"
+
+                MDToolbar:
+                    id: toolbar
+                    title: "Shopping List"
+                    elevation: 10
+                    left_action_items: [['menu', lambda x: app.nav_drawer.set_state()]]
+                	
+                BoxLayout:
+                	size_hint: .95,.95
+                	pos_hint: {'center_x':.5,'center_y':.5}
+                	orientation: 'vertical'
+                	padding: '16dp'
+
+                    MDLabel:
+                        text: "Finishing will delete all current shopping list data. You will not be able to recover this list. Are you sure you want to finish?"
+
+                    BoxLayout:
+                        size_hint_y: None
+
+                        MDFlatButton:
+                            text: 'Cancel'
+                            on_release:
+                                screen_manager.current = 'shopping_list'
+
+                        MDRaisedButton:
+                            text: 'Finish'
+                            on_release:
+                                app.finish_with_admin_list()
+
+                    BoxLayout:
+                        size_hint_y: .9
+
+        Screen:
+            name: "view_lists"
+
+            BoxLayout:
+                orientation: "vertical"
+
+                MDToolbar:
+                    id: toolbar
+                    title: "View Lists"
+                    elevation: 10
+                    left_action_items: [['menu', lambda x: app.nav_drawer.set_state()]]
+                    
+                FloatLayout:
+                	pos_hint: {'center_x':.5,'center_y':.5}
+                	padding: '16dp'
+                	
+                	ScrollView:
+
+                	    MDList:
+                            id: view_lists
+
+        Screen:
+            name: "accounts_list"
+
+            BoxLayout:
+                orientation: "vertical"
+
+                MDToolbar:
+                    id: toolbar
+                    title: "Manage Accounts"
+                    elevation: 10
+                    left_action_items: [['menu', lambda x: app.nav_drawer.set_state()]]
+
+                FloatLayout:
+                    pos_hint: {'center_x':.5,'center_y':.5}
+                    padding: '16dp'
+
+                    ScrollView:
+
+                        MDList: 
+                            id: accounts_list
+
+                    MDFloatingActionButton:
+                        icon: 'plus'
+                        pos_hint: {'center_x':.9,'center_y':.1}
+                        md_bg_color: app.theme_cls.primary_color
+                        text_color: app.theme_cls.opposite_text_color
+                        on_release:
+                            app.last_screen = 'accounts_list'
+                            app.root.ids.new_username_field.text = ''
+                            app.root.ids.new_username_field.on_focus()
+                            app.root.ids.admin_switch.active = False
+                            app.generate_password()
+                            app.set_screen('create_account')
+
+        Screen:
+            name: "user_data"
+
+            BoxLayout:
+                orientation: "vertical"
+
+                MDToolbar:
+                    id: toolbar
+                    title: "Manage Accounts"
+                    elevation: 10
+                    left_action_items: [['arrow-left-thick', lambda x: app.set_screen(app.last_screen)]]
+                    
+                BoxLayout:
+                	size_hint: .95,.95
+                	pos_hint: {'center_x':.5,'center_y':.5}
+                	orientation: 'vertical'
+                	padding: '16dp'
+                	
+                    GridLayout:
+                        cols: 1
+                        spacing: '8dp'
+                        size_hint_y: None
+                        height: self.minimum_height
+
+                        MDLabel:
+                            id: user_data_username
+                            size_hint_y: None
+                            text: 'Username: %s' % app.user_data_username
+
+                        MDLabel:
+                            id: user_data_password
+                            size_hint_y: None
+                            text: 'Password: %s' % app.user_data_password
+
+                        MDRaisedButton:
+                            text: 'Delete User'
+                            on_release:
+                                app.delete_user()
+                                app.root.ids.screen_manager.current = app.last_screen
+                    
+                    BoxLayout:
+                        size_hint_y: .9
+
+                	        
